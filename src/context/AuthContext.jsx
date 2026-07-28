@@ -48,7 +48,7 @@ export function AuthProvider({ children }) {
     }
 
     async function signIn(email, password) {
-        return supabase.auth.signInWithPassword({ email, passowrd })
+        return supabase.auth.signInWithPassword({ email, password })
     }
 
     async function signOut() {

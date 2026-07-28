@@ -4,10 +4,8 @@ import SignUp from './pages/SignUp'
 import Login from './pages/Login'
 import GroupSetup from './pages/GroupSetup'
 import { RequireAuth, RequireGroup } from './routes/ProtectedRoute'
-
-function TaskListPlaceholder() {
-  return <h1>Lista de tarefas (próximo passo)</h1>
-}
+import TaskList from './pages/TaskList'
+import History from './pages/History'
 
 export default function App() {
   return (
@@ -20,7 +18,8 @@ export default function App() {
           <Route element={<RequireAuth />}>
             <Route path="/grupo" element={<GroupSetup />} />
             <Route element={<RequireGroup />}>
-              <Route path="/" element={<TaskListPlaceholder />} />
+              <Route path="/" element={<TaskList />} />
+              <Route path="/historico" element={<History />} />
             </Route>
           </Route>
         </Routes>
