@@ -1,6 +1,6 @@
 import { useAuth } from '../context/AuthContext'
 import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { fetchCompletedTasks } from '../lib/taskService'
 import "../styles/History.css"
 
 export default function History() {
@@ -14,33 +14,13 @@ export default function History() {
     }, [group])
 
     async function loadHistory() {
-        const { data: taskData, error } = await supabase
-            .from('tasks')
-            .select('*')
-            .eq('group_id', group.id)
-            .eq('completed', true)
-            .order('completed_at', { ascending: false })
+        setLoading(true)
 
-        if (error) {
-            setLoading(false)
-            return
+        const { data, error } = await fetchCompletedTasks(group.id)
+        if (!error) {
+            setTasks(data)
         }
 
-        const userIds = [...new Set(taskData.map((t) => t.completed_by).filter(Boolean))]
-
-        const { data: profiles } = await supabase
-            .from('profiles')
-            .select('id, full_name')
-            .in('id', userIds)
-
-        const nameById = Object.fromEntries((profiles ?? []).map((p) => [p.id, p.full_name]))
-
-        const withNames = taskData.map((t) => ({
-            ...t,
-            completedByName: nameById[t.completed_by] ?? 'alguém',
-        }))
-
-        setTasks(withNames)
         setLoading(false)
     }
 

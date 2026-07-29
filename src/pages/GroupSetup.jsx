@@ -1,16 +1,23 @@
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import "../styles/GroupSetup.css"
+import { translateError } from '../lib/errorMessages'
 
 export default function GroupSetup() {
-    const { groups, createGroup, joinGroup, leaveGroup, selectGroup, signOut } = useAuth()
+    const { groups, groupsLoaded, createGroup, joinGroup, leaveGroup, selectGroup, signOut } = useAuth()
     const navigate = useNavigate()
-    const [mode, setMode] = useState(groups.length > 0 ? null : 'create')
+    const [mode, setMode] = useState(null)
     const [name, setName] = useState('')
     const [code, setCode] = useState('')
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+        if (groupsLoaded && groups.length === 0) {
+            setMode('create')
+        }
+    }, [groupsLoaded, groups.length])
 
     async function handleSubmit(e) {
         e.preventDefault()
@@ -19,7 +26,7 @@ export default function GroupSetup() {
         const { error } = mode === 'create' ? await createGroup(name) : await joinGroup(code)
         setLoading(false)
         if (error) {
-            setError(error.message)
+            setError(translateError(error))
             return
         }
         navigate('/')

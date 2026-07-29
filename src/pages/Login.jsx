@@ -2,6 +2,7 @@ import { useAuth } from '../context/AuthContext'
 import { useNavigate, Link } from 'react-router-dom'
 import { useState } from 'react'
 import "../styles/Auth.css"
+import { translateError } from '../lib/errorMessages'
 
 export default function Login() {
     const { signIn } = useAuth()
@@ -18,7 +19,7 @@ export default function Login() {
         const { error } = await signIn(email, password)
         setLoading(false)
         if (error) {
-            setError('E-mail ou senha incorretos.')
+            setError(translateError(error))
             return
         }
         navigate('/')

@@ -1,11 +1,14 @@
 import { Outlet } from 'react-router-dom'
 import BottomNav from './BottomNav'
+import { TasksProvider } from '../context/TasksContext'
 
 export default function Layout() {
     return (
-        <div className="app-layout">
-            <Outlet />
-            <BottomNav />
-        </div>
+        <TasksProvider>
+            <div className="app-layout">
+                <Outlet />
+                <BottomNav />
+            </div>
+        </TasksProvider>
     )
 }

@@ -1,96 +1,22 @@
 import { useAuth } from '../context/AuthContext'
-import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { useState } from 'react'
+import { useTasksContext } from '../context/TasksContext'
 import TaskItem from '../components/TaskItem'
 import { useNavigate } from 'react-router-dom'
 import "../styles/TaskList.css"
 
 export default function TaskList() {
-    const { activeGroup: group, session, signOut } = useAuth()
-    const [pendingTasks, setPendingTasks] = useState([])
-    const [completedTasks, setCompletedTasks] = useState([])
+    const { activeGroup: group } = useAuth()
     const [title, setTitle] = useState('')
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState('')
     const navigate = useNavigate()
-
-    useEffect(() => {
-        if (!group) return
-        loadTasks()
-
-        const channel = supabase
-            .channel('tasks-changes')
-            .on(
-                'postgres_changes',
-                { event: '*', schema: 'public', table: 'tasks', filter: `group_id=eq.${group.id}` },
-                (payload) => handleRealtimeChange(payload)
-            )
-            .subscribe()
-
-        return () => supabase.removeChannel(channel)
-    }, [group])
-
-    async function loadTasks() {
-        const { data, error } = await supabase
-            .from('tasks')
-            .select('*')
-            .eq('group_id', group.id)
-            .eq('completed', false)
-            .order('created_at', { ascending: false })
-
-        if (!error) setPendingTasks(data)
-        setLoading(false)
-    }
-
-    function handleRealtimeChange(payload) {
-        if (payload.eventType === 'INSERT') {
-            setPendingTasks((prev) => [payload.new, ...prev])
-        }
-        if (payload.eventType === 'UPDATE' && payload.new.completed) {
-            setPendingTasks((prev) => prev.filter((t) => t.id !== payload.new.id))
-            setCompletedTasks((prev) =>
-                prev.some((t) => t.id === payload.new.id) ? prev : [payload.new, ...prev]
-            )
-        }
-    }
+    const { pendingTasks, completedTasks, loading, error, addTask, completeTask, clearCompleted } =
+        useTasksContext()
 
     async function handleAdd(e) {
         e.preventDefault()
         if (!title.trim()) return
-        setError('')
-
-        const { error } = await supabase.from('tasks').insert({
-            title: title.trim(),
-            group_id: group.id,
-            created_by: session.user.id,
-        })
-
-        if (error) {
-            setError(error.message)
-            return
-        }
-        setTitle('')
-    }
-
-    async function handleComplete(taskId) {
-        const task = pendingTasks.find((t) => t.id === taskId)
-        if (!task) return
-
-        setPendingTasks((prev) => prev.filter((t) => t.id !== taskId))
-        setCompletedTasks((prev) => [{ ...task, completed: true }, ...prev])
-
-        await supabase
-            .from('tasks')
-            .update({
-                completed: true,
-                completed_by: session.user.id,
-                completed_at: new Date().toISOString(),
-            })
-            .eq('id', taskId)
-    }
-
-    function handleClearCompleted() {
-        setCompletedTasks([])
+        const { error } = await addTask(title.trim())
+        if (!error) setTitle('')
     }
 
     if (loading) return <p>Carregando tarefas...</p>
@@ -134,7 +60,7 @@ export default function TaskList() {
                 <>
                     <ul className="task-list">
                         {pendingTasks.map((task) => (
-                            <TaskItem key={task.id} task={task} onComplete={handleComplete} />
+                            <TaskItem key={task.id} task={task} onComplete={completeTask} />
                         ))}
                     </ul>
 
@@ -142,7 +68,7 @@ export default function TaskList() {
                         <div className="completed-section">
                             <div className="completed-section-header">
                                 <span>Concluídas</span>
-                                <button className="clear-btn" onClick={handleClearCompleted}>
+                                <button className="clear-btn" onClick={clearCompleted}>
                                     Limpar concluídas
                                 </button>
                             </div>

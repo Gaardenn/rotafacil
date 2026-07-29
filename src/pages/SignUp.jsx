@@ -1,6 +1,8 @@
 import { useAuth } from '../context/AuthContext'
 import { useNavigate, Link } from 'react-router-dom'
 import { useState } from 'react'
+import "../styles/Auth.css"
+import { translateError } from '../lib/errorMessages'
 
 export default function SignUp() {
     const { signUp } = useAuth()
@@ -18,7 +20,7 @@ export default function SignUp() {
         const { error } = await signUp(email, password, fullName)
         setLoading(false)
         if (error) {
-            setError(error.message)
+            setError(translateError(error))
             return
         }
         navigate('/grupo')

@@ -11,6 +11,7 @@ export function AuthProvider({ children }) {
         () => localStorage.getItem(ACTIVE_GROUP_KEY) || null
     )
     const [loading, setLoading] = useState(true)
+    const [groupsLoaded, setGroupsLoaded] = useState(false);
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data }) => {
@@ -28,6 +29,7 @@ export function AuthProvider({ children }) {
     useEffect(() => {
         if (!session) {
             setGroups([])
+            setGroupsLoaded(false)
             return
         }
         loadGroups()
@@ -35,13 +37,20 @@ export function AuthProvider({ children }) {
 
     async function loadGroups() {
         const { data, error } = await supabase.from('groups').select('*').order('created_at')
-        if (!error) {
-            setGroups(data)
-            if (activeGroupId && !data.some((g) => g.id === activeGroupId)) {
-                setActiveGroupId(null)
-                localStorage.removeItem(ACTIVE_GROUP_KEY)
-            }
+        if (error) {
+            console.error('Erro ao carregar grupos:', error.message)
+            setGroupsLoaded(true)
+            return
         }
+        setGroups(data)
+        setGroupsLoaded(true)
+        setActiveGroupId((current) => {
+            if (current && !data.some((g) => g.id === current)) {
+                localStorage.removeItem(ACITVE_GROUP_KEY)
+                return null
+            }
+            return current
+        })
     }
 
     function selectGroup(groupId) {
@@ -104,6 +113,7 @@ export function AuthProvider({ children }) {
             value={{
                 session,
                 groups,
+                groupsLoaded,
                 activeGroup,
                 loading,
                 signUp,
