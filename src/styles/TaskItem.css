@@ -36,7 +36,8 @@
     background: var(--color-primary-soft);
 }
 
-.task-item.is-completing .task-checkbox {
+.task-item.is-completing .task-checkbox,
+.task-item.is-done-item .task-checkbox {
     background: var(--color-primary);
     border-color: var(--color-primary);
     color: white;
@@ -51,4 +52,18 @@
     font-size: 1.125rem;
     font-weight: 600;
     color: var(--color-ink);
+}
+
+.task-item-title.is-done {
+    text-decoration: line-through;
+}
+
+.task-item.is-done-item {
+    opacity: 0.75;
+}
+
+.task-item.is-done-item .task-checkbox {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
 }

@@ -2,12 +2,13 @@ import { useAuth } from '../context/AuthContext'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import TaskItem from '../components/TaskItem'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import "../styles/TaskList.css"
 
 export default function TaskList() {
     const { activeGroup: group, session, signOut } = useAuth()
-    const [tasks, setTasks] = useState([])
+    const [pendingTasks, setPendingTasks] = useState([])
+    const [completedTasks, setCompletedTasks] = useState([])
     const [title, setTitle] = useState('')
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
@@ -22,7 +23,7 @@ export default function TaskList() {
             .on(
                 'postgres_changes',
                 { event: '*', schema: 'public', table: 'tasks', filter: `group_id=eq.${group.id}` },
-                () => loadTasks()
+                (payload) => handleRealtimeChange(payload)
             )
             .subscribe()
 
@@ -37,8 +38,20 @@ export default function TaskList() {
             .eq('completed', false)
             .order('created_at', { ascending: false })
 
-        if (!error) setTasks(data)
+        if (!error) setPendingTasks(data)
         setLoading(false)
+    }
+
+    function handleRealtimeChange(payload) {
+        if (payload.eventType === 'INSERT') {
+            setPendingTasks((prev) => [payload.new, ...prev])
+        }
+        if (payload.eventType === 'UPDATE' && payload.new.completed) {
+            setPendingTasks((prev) => prev.filter((t) => t.id !== payload.new.id))
+            setCompletedTasks((prev) =>
+                prev.some((t) => t.id === payload.new.id) ? prev : [payload.new, ...prev]
+            )
+        }
     }
 
     async function handleAdd(e) {
@@ -60,6 +73,12 @@ export default function TaskList() {
     }
 
     async function handleComplete(taskId) {
+        const task = pendingTasks.find((t) => t.id === taskId)
+        if (!task) return
+
+        setPendingTasks((prev) => prev.filter((t) => t.id !== taskId))
+        setCompletedTasks((prev) => [{ ...task, completed: true }, ...prev])
+
         await supabase
             .from('tasks')
             .update({
@@ -68,6 +87,10 @@ export default function TaskList() {
                 completed_at: new Date().toISOString(),
             })
             .eq('id', taskId)
+    }
+
+    function handleClearCompleted() {
+        setCompletedTasks([])
     }
 
     if (loading) return <p>Carregando tarefas...</p>
@@ -101,18 +124,36 @@ export default function TaskList() {
 
             {loading ? (
                 <p className="task-empty">Carregando tarefas...</p>
-            ) : tasks.length === 0 ? (
+            ) : pendingTasks.length === 0 && completedTasks.length === 0 ? (
                 <div className="task-empty-state">
                     <span className="task-empty-emoji">🌿</span>
                     <p>Nenhuma tarefa pendente.</p>
                     <p className="task-empty-sub">Adicione a primeira acima.</p>
                 </div>
             ) : (
-                <ul className="task-list">
-                    {tasks.map((task) => (
-                        <TaskItem key={task.id} task={task} onComplete={handleComplete} />
-                    ))}
-                </ul>
+                <>
+                    <ul className="task-list">
+                        {pendingTasks.map((task) => (
+                            <TaskItem key={task.id} task={task} onComplete={handleComplete} />
+                        ))}
+                    </ul>
+
+                    {completedTasks.length > 0 && (
+                        <div className="completed-section">
+                            <div className="completed-section-header">
+                                <span>Concluídas</span>
+                                <button className="clear-btn" onClick={handleClearCompleted}>
+                                    Limpar concluídas
+                                </button>
+                            </div>
+                            <ul className="task-list">
+                                {completedTasks.map((task) => (
+                                    <TaskItem key={task.id} task={task} completed />
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </>
             )}
         </div>
     )

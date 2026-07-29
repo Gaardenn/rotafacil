@@ -1,11 +1,11 @@
 import "../styles/TaskItem.css"
 import { useState } from 'react'
 
-export default function TaskItem({ task, onComplete }) {
+export default function TaskItem({ task, onComplete, completed = false }) {
     const [isCompleting, setIsCompleting] = useState(false)
 
     function handleClick() {
-        if (isCompleting) return
+        if (completed || isCompleting) return
         setIsCompleting(true)
         setTimeout(() => {
             onComplete(task.id)
@@ -13,11 +13,12 @@ export default function TaskItem({ task, onComplete }) {
     }
 
     return (
-        <li className={`task-item ${isCompleting ? 'is-completing' : ''}`}>
+        <li className={`task-item ${isCompleting ? 'is-completing' : ''} ${completed ? 'is-done-item' : ''}`}>
             <button
                 className="task-checkbox"
                 onClick={handleClick}
-                aria-label={`Marcar "${task.title}" como concluída`}
+                aria-label={completed ? `${task.title} concluída` : `Marcar "${task.title}" como concluída`}
+                disabled={completed}
             >
                 <svg viewBox="0 0 24 24" className="task-checkbox-icon">
                     <path
@@ -30,7 +31,7 @@ export default function TaskItem({ task, onComplete }) {
                     />
                 </svg>
             </button>
-            <span className="task-item-title">{task.title}</span>
+            <span className={`task-item-title ${completed ? 'is-done' : ''}`}>{task.title}</span>
         </li>
     )
 }
