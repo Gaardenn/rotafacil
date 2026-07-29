@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabaseClient'
 import "../styles/History.css"
 
 export default function History() {
-    const { group } = useAuth()
+    const { activeGroup: group } = useAuth()
     const [tasks, setTasks] = useState([])
     const [loading, setLoading] = useState(true)
 

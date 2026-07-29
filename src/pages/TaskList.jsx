@@ -2,15 +2,16 @@ import { useAuth } from '../context/AuthContext'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import TaskItem from '../components/TaskItem'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import "../styles/TaskList.css"
 
 export default function TaskList() {
-    const { group, session, signOut } = useAuth()
+    const { activeGroup: group, session, signOut } = useAuth()
     const [tasks, setTasks] = useState([])
     const [title, setTitle] = useState('')
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (!group) return
@@ -78,7 +79,7 @@ export default function TaskList() {
                     <p className="task-eyebrow">Seu grupo</p>
                     <h1>{group.name}</h1>
                 </div>
-                <button className="task-avatar" onClick={signOut} aria-label="Sair da conta">
+                <button className="task-avatar" onClick={() => navigate('/grupo')} aria-label="Trocar de grupo ou sair">
                     {group.name.charAt(0).toUpperCase()}
                 </button>
             </header>

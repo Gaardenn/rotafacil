@@ -9,8 +9,8 @@ export function RequireAuth() {
 }
 
 export function RequireGroup() {
-    const { group, loading } = useAuth()
+    const { activeGroup, loading } = useAuth()
     if (loading) return <p>Carregando...</p>
-    if (!group) return <Navigate to="/grupo" replace />
+    if (!activeGroup) return <Navigate to="/grupo" replace />
     return <Outlet />
 }

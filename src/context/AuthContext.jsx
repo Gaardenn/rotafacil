@@ -2,10 +2,14 @@ import { createContext, useState, useEffect, useContext } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
 const AuthContext = createContext(null)
+const ACTIVE_GROUP_KEY = 'rotafacil_active_group'
 
 export function AuthProvider({ children }) {
     const [session, setSession] = useState(null)
-    const [group, setGroup] = useState(null)
+    const [groups, setGroups] = useState([])
+    const [activeGroupId, setActiveGroupId] = useState(
+        () => localStorage.getItem(ACTIVE_GROUP_KEY) || null
+    )
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -23,20 +27,26 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
         if (!session) {
-            setGroup(null)
+            setGroups([])
             return
         }
-        loadGroup()
+        loadGroups()
     }, [session])
 
-    async function loadGroup() {
-        const { data, error } = await supabase
-            .from('groups')
-            .select('*')
-            .limit(1)
-            .maybeSingle()
-        
-        if (!error) setGroup(data)
+    async function loadGroups() {
+        const { data, error } = await supabase.from('groups').select('*').order('created_at')
+        if (!error) {
+            setGroups(data)
+            if (activeGroupId && !data.some((g) => g.id === activeGroupId)) {
+                setActiveGroupId(null)
+                localStorage.removeItem(ACTIVE_GROUP_KEY)
+            }
+        }
+    }
+
+    function selectGroup(groupId) {
+        setActiveGroupId(groupId)
+        localStorage.setItem(ACTIVE_GROUP_KEY, groupId)
     }
 
     async function signUp(email, password, fullName) {
@@ -52,24 +62,58 @@ export function AuthProvider({ children }) {
     }
 
     async function signOut() {
+        setActiveGroupId(null)
+        localStorage.removeItem(ACTIVE_GROUP_KEY)
         return supabase.auth.signOut()
     }
 
     async function createGroup(name) {
         const { data, error } = await supabase.rpc('create_group', { group_name: name })
-        if (!error) setGroup(data)
+        if (!error) {
+            await loadGroups()
+            selectGroup(data.id)
+        }
         return { data, error }
     }
 
     async function joinGroup(code) {
         const { data, error } = await supabase.rpc('join_group_by_code', { code })
-        if (!error) setGroup(data)
+        if (!error) {
+            await loadGroups()
+            selectGroup(data.id)
+        }
         return { data, error }
     }
 
+    async function leaveGroup(groupId) {
+        const { error } = await supabase.rpc('leave_group', { gid: groupId })
+        if (!error) {
+            if (activeGroupId === groupId) {
+                setActiveGroupId(null)
+                localStorage.removeItem(ACTIVE_GROUP_KEY)
+            }
+            await loadGroups()
+        }
+        return { error }
+    }
+
+    const activeGroup = groups.find((g) => g.id === activeGroupId) || null
+
     return (
         <AuthContext.Provider
-            value={{ session, group, loading, signUp, signIn, signOut, createGroup, joinGroup }}
+            value={{
+                session,
+                groups,
+                activeGroup,
+                loading,
+                signUp,
+                signIn,
+                signOut,
+                createGroup,
+                joinGroup,
+                leaveGroup,
+                selectGroup,
+            }}
         >
             {children}
         </AuthContext.Provider>
