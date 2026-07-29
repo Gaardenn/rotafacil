@@ -25,35 +25,59 @@ export default function SignUp() {
     }
 
     return (
-        <form onSubmit={handleSubmit}>
-            <h1>Criar conta</h1>
-            <input
-                type="text"
-                placeholder="Seu nome"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-            />
-            <input
-                type="email"
-                placeholder="E-mail"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-            />
-            <input
-                type="password"
-                placeholder="Senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                minLength={6}
-                required
-            />
-            {error && <p role="alert">{error}</p>}
-            <button type="submit" disabled={loading}>
-                {loading ? 'Criando...' : 'Criar conta'}
-            </button>
-            <p>Já tem conta? <Link to="/login">Entrar</Link></p>
-        </form>
+        <div className="auth-screen">
+            <div className="auth-header">
+                <span className="auth-logo">✨</span>
+                <h1>Criar conta</h1>
+                <p className="auth-subtitle">Leva menos de um minuto</p>
+            </div>
+
+            <form className="auth-form" onSubmit={handleSubmit}>
+                <label className="field">
+                    <span className="field-label">Seu nome</span>
+                    <input
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Como podemos te chamar?"
+                        required
+                    />
+                </label>
+
+                <label className="field">
+                    <span className="field-label">E-mail</span>
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="seuemail@exemplo.com"
+                        required
+                    />
+                </label>
+
+                <label className="field">
+                    <span className="field-label">Senha</span>
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Minimo 6 caracteres"
+                        minLength={6}
+                        required
+                    />
+                </label>
+
+                {error && <p className="field-error">{error}</p>}
+
+                <button type="submit" className="btn-primary" disabled={loading}>
+                    {loading ? 'Criando...' : 'Criar conta'}
+                </button>
+            </form>
+
+
+            <p className="auth-footer">
+                Já tem conta? <Link to="/login">Entrar</Link>
+            </p>
+        </div>
     )
 }

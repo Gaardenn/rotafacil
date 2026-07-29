@@ -1,6 +1,7 @@
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import "../styles/GroupSetup.css"
 
 export default function GroupSetup() {
     const { createGroup, joinGroup } = useAuth()
@@ -25,38 +26,58 @@ export default function GroupSetup() {
     }
 
     return (
-        <div>
-            <h1>Vamos organizar suas tarefas</h1>
-            <div>
-                <button onClick={() => setMode('create')} disabled={mode === 'create'}>
+        <div className="group-screen">
+            <div className="group-header">
+                <span className="group-emoji">🏡</span>
+                <h1>Vamos organizar tudo</h1>
+                <p className="auth-subtitle">Crie um espaço só seu, ou entre no de alguém</p>
+            </div>
+
+            <div className="group-tabs">
+                <button
+                    className={`group-tab ${mode === 'create' ? 'active' : ''}`}
+                    onClick={() => setMode('create')}
+                >
                     Criar grupo
                 </button>
-                <button onClick={() => setMode('join')} disabled={mode === 'join'}>
-                    Entrar com código
+                <button
+                    className={`group-tab ${mode === 'join' ? 'active' : ''}`}
+                    onClick={() => setMode('join')}
+                >
+                    Já tenho código
                 </button>
             </div>
 
-            <form onSubmit={handleSubmit}>
+            <form className="auth-form" onSubmit={handleSubmit}>
                 {mode === 'create' ? (
-                    <input
-                        type="text"
-                        placeholder="Nome do grupo (ex: Casa da família)"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                    />
+                    <label className="field">
+                        <span className="field-label">Nome do grupo</span>
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Ex: Casa da família"
+                            required
+                        />
+                    </label>
                 ) : (
-                    <input
-                        type="text"
-                        placeholder="Código de convite"
-                        value={code}
-                        onChange={(e) => setCode(e.target.value)}
-                        required
-                    />
+                    <label className="field">
+                        <span className="field-label">Código de convite</span>
+                        <input
+                            type="text"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            placeholder="Ex: A1B2C3"
+                            className="field-code"
+                            required
+                        />
+                    </label>
                 )}
-                {error && <p role="alert">{error}</p>}
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Aguarde...' : mode === 'create' ? 'Criar' : 'Entrar'}
+
+                {error && <p className="field-error">{error}</p>}
+
+                <button type="submit" className="btn-primary" disabled={loading}>
+                    {loading ? 'Aguarde...' : mode === 'create' ? 'Criar grupo' : 'Entrar no grupo'}
                 </button>
             </form>
         </div>

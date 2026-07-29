@@ -1,6 +1,7 @@
 import { useAuth } from '../context/AuthContext'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import "../styles/History.css"
 
 export default function History() {
     const { group } = useAuth()
@@ -19,7 +20,7 @@ export default function History() {
             .eq('group_id', group.id)
             .eq('completed', true)
             .order('completed_at', { ascending: false })
-        
+
         if (error) {
             setLoading(false)
             return
@@ -46,16 +47,35 @@ export default function History() {
     if (loading) return <p>Carregando histórico...</p>
 
     return (
-        <div>
-            <h1>Histórico</h1>
-            {tasks.length === 0 ? (
-                <p>Nenhuma tarefa concluída ainda.</p>
+        <div className="history-screen">
+            <header className="history-header">
+                <h1>Histórico</h1>
+                <p className="auth-subtitle">O que já foi feito</p>
+            </header>
+
+            {loading ? (
+                <p className="task-empty">Carregando...</p>
+            ) : tasks.length === 0 ? (
+                <div className="task-empty-state">
+                    <span className="task-empty-emoji">📋</span>
+                    <p>Nenhuma tarefa concluída ainda.</p>
+                </div>
             ) : (
-                <ul>
+                <ul className="history-list">
                     {tasks.map((task) => (
-                        <li key={task.id}>
-                            {task.title} - concluída por {task.completedByName} em{' '}
-                            {new Date(task.completed_at).toLocaleString('pt-BR')}
+                        <li key={task.id} className="history-item">
+                            <div className="history-check">✓</div>
+                            <div className="history-content">
+                                <p className="history-title">{task.title}</p>
+                                <p className="history-meta">
+                                    {task.completedByName} · {new Date(task.completed_at).toLocaleString('pt-BR', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                    })}
+                                </p>
+                            </div>
                         </li>
                     ))}
                 </ul>

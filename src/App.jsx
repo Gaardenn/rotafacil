@@ -6,6 +6,7 @@ import GroupSetup from './pages/GroupSetup'
 import { RequireAuth, RequireGroup } from './routes/ProtectedRoute'
 import TaskList from './pages/TaskList'
 import History from './pages/History'
+import Layout from './components/Layout'
 
 export default function App() {
   return (
@@ -18,8 +19,10 @@ export default function App() {
           <Route element={<RequireAuth />}>
             <Route path="/grupo" element={<GroupSetup />} />
             <Route element={<RequireGroup />}>
-              <Route path="/" element={<TaskList />} />
-              <Route path="/historico" element={<History />} />
+              <Route element={<Layout />}>
+                <Route path="/" element={<TaskList />} />
+                <Route path="/historico" element={<History />} />
+              </Route>
             </Route>
           </Route>
         </Routes>

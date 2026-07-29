@@ -1,6 +1,7 @@
 import { useAuth } from '../context/AuthContext'
 import { useNavigate, Link } from 'react-router-dom'
 import { useState } from 'react'
+import "../styles/Auth.css"
 
 export default function Login() {
     const { signIn } = useAuth()
@@ -24,27 +25,46 @@ export default function Login() {
     }
 
     return (
-        <form onSubmit={handleSubmit}>
-            <h1>Entrar</h1>
-            <input
-                type="email"
-                placeholder="E-mail"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-            />
-            <input
-                type="password"
-                placeholder="Senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-            />
-            {error && <p role="alert">{error}</p>}
-            <button type="submit" disabled={loading}>
-                {loading ? 'Entrando...' : 'Entrar'}
-            </button>
-            <p>Não tem conta? <Link to="/cadastro">Criar conta</Link></p>
-        </form>
+        <div className="auth-screen">
+            <div className="auth-header">
+                <span className="auth-logo">🗺️</span>
+                <h1>Bem-vindo de volta</h1>
+                <p className="auth-subtitle">Entre para ver suas tarefas</p>
+            </div>
+
+            <form className="auth-form" onSubmit={handleSubmit}>
+                <label className="field">
+                    <span className="field-label">E-mail</span>
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="seuemail@exemplo.com"
+                        required
+                    />
+                </label>
+
+                <label className="field">
+                    <span className="field-label">Senha</span>
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        required
+                    />
+                </label>
+
+                {error && <p className="field-error">{error}</p>}
+
+                <button type="submit" className="btn-primary" disabled={loading}>
+                    {loading ? 'Entrando...' : 'Entrar'}
+                </button>
+            </form>
+
+            <p className="auth-footer">
+                Não tem conta? <Link to="/cadastro">Criar conta</Link>
+            </p>
+        </div>
     )
 }

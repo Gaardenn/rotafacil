@@ -1,0 +1,110 @@
+.task-screen {
+    min-height: 100vh;
+    padding: var(--space-4) var(--space-3) 6.25rem;
+    max-width: 480px;
+    margin: 0 auto;
+    animation: fade-up 0.4s ease both;
+}
+
+.task-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+}
+
+.task-eyebrow {
+    color: var(--color-ink-soft);
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.0625rem;
+    margin: 0 0 0.25rem;
+}
+
+.task-header h1 {
+    font-size: 1.675rem;
+}
+
+.task-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.task-add-form {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.task-add-input {
+    flex: 1;
+    padding: 1rem var(--space-3);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+}
+
+.task-add-input:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 4px var(--color-primary-soft);
+}
+
+.task-add-btn {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    background: var(--color-accent);
+    color: white;
+    font-size: 1.75rem;
+    font-weight: 700;
+    box-shadow: 0 6px 16px rgba(232, 149, 92, 0.4);
+    transition: transform 0.15s ease;
+}
+
+.task-add-btn:active {
+    transform: scale(0.9) rotate(90deg);
+}
+
+.task-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.task-empty-state {
+    text-align: center;
+    padding: var(--space-5) var(--space-3);
+    color: var(--color-ink-soft);
+}
+
+.task-empty-emoji {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: var(--space-2);
+}
+
+.task-empty-sub {
+    font-size: 0.9375rem;
+    opacity: 0.8;
+}
+
+.task-empty {
+    text-align: center;
+    color: var(--color-ink-soft);
+    padding: var(--space-5) 0;
+}

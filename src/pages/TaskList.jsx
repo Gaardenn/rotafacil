@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import TaskItem from '../components/TaskItem'
 import { Link } from 'react-router-dom'
+import "../styles/TaskList.css"
 
 export default function TaskList() {
-    const { group, session } = useAuth()
+    const { group, session, signOut } = useAuth()
     const [tasks, setTasks] = useState([])
     const [title, setTitle] = useState('')
     const [loading, setLoading] = useState(true)
@@ -23,7 +24,7 @@ export default function TaskList() {
                 () => loadTasks()
             )
             .subscribe()
-        
+
         return () => supabase.removeChannel(channel)
     }, [group])
 
@@ -71,31 +72,47 @@ export default function TaskList() {
     if (loading) return <p>Carregando tarefas...</p>
 
     return (
-        <div>
-            <h1>{group.name}</h1>
+        <div className="task-screen">
+            <header className="task-header">
+                <div>
+                    <p className="task-eyebrow">Seu grupo</p>
+                    <h1>{group.name}</h1>
+                </div>
+                <button className="task-avatar" onClick={signOut} aria-label="Sair da conta">
+                    {group.name.charAt(0).toUpperCase()}
+                </button>
+            </header>
 
-            <form onSubmit={handleAdd}>
+            <form className="task-add-form" onSubmit={handleAdd}>
                 <input
                     type="text"
-                    placeholder="Nova tarefa"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
+                    placeholder="O que precisa ser feito?"
+                    className="task-add-input"
                 />
-                <button type="submit">Adicionar</button>
+                <button type="submit" className="task-add-btn" aria-label="Adicionar tarefa">
+                    +
+                </button>
             </form>
-            {error && <p role="alert">{error}</p>}
 
-            {tasks.length === 0 ? (
-                <p>Nenhuma tarefa pendente.</p>
+            {error && <p className="field-error">{error}</p>}
+
+            {loading ? (
+                <p className="task-empty">Carregando tarefas...</p>
+            ) : tasks.length === 0 ? (
+                <div className="task-empty-state">
+                    <span className="task-empty-emoji">🌿</span>
+                    <p>Nenhuma tarefa pendente.</p>
+                    <p className="task-empty-sub">Adicione a primeira acima.</p>
+                </div>
             ) : (
-                <ul>
+                <ul className="task-list">
                     {tasks.map((task) => (
                         <TaskItem key={task.id} task={task} onComplete={handleComplete} />
                     ))}
                 </ul>
             )}
-
-            <Link to="/historico">historico</Link>
         </div>
     )
 }
